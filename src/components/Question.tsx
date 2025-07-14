@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock } from 'lucide-react';
 import { Question as QuestionType } from '../types/quiz';
 
@@ -19,20 +20,23 @@ const Question: React.FC<QuestionProps> = ({
 }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
-  const [hasAnswered, setHasAnswered] = useState(false);
+
+  // Reset state when question changes
+  useEffect(() => {
+    setSelectedAnswer(null);
+    setShowResult(false);
+  }, [question.id]);
 
   const handleAnswerClick = (answerIndex: number) => {
-    if (hasAnswered) return;
+    if (showResult) return;
     
     setSelectedAnswer(answerIndex);
     setShowResult(true);
-    setHasAnswered(true);
     
     const isCorrect = answerIndex === question.correctAnswer;
     
-    setTimeout(() => {
-      onAnswer(answerIndex, isCorrect);
-    }, 2000);
+    // Call onAnswer immediately so parent can handle timing
+    onAnswer(answerIndex, isCorrect);
   };
 
   const getOptionClass = (index: number) => {
@@ -97,9 +101,9 @@ const Question: React.FC<QuestionProps> = ({
             <button
               key={index}
               onClick={() => handleAnswerClick(index)}
-              disabled={hasAnswered}
+              disabled={showResult}
               className={`w-full p-4 text-left border-2 rounded-lg transition-all duration-200 ${getOptionClass(index)} ${
-                hasAnswered ? 'cursor-not-allowed' : 'cursor-pointer'
+                showResult ? 'cursor-not-allowed' : 'cursor-pointer'
               }`}
             >
               <div className="flex items-center justify-between">

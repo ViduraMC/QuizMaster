@@ -18,12 +18,13 @@ const QuizGame: React.FC<QuizGameProps> = ({ quiz, onBackToCategories, onShowLea
   const [startTime, setStartTime] = useState(Date.now());
   const [playerName, setPlayerName] = useState('');
   const [isGameStarted, setIsGameStarted] = useState(false);
+  const [isAnswered, setIsAnswered] = useState(false);
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
   useEffect(() => {
-    if (!isGameStarted) return;
+    if (!isGameStarted || isAnswered) return;
     
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -36,27 +37,38 @@ const QuizGame: React.FC<QuizGameProps> = ({ quiz, onBackToCategories, onShowLea
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [currentQuestionIndex, isGameStarted]);
+  }, [currentQuestionIndex, isGameStarted, isAnswered]);
+
+  // Reset timer and answered state when question changes
+  useEffect(() => {
+    setTimeLeft(30);
+    setIsAnswered(false);
+  }, [currentQuestionIndex]);
 
   const handleTimeUp = () => {
+    setIsAnswered(true);
     if (isLastQuestion) {
-      finishQuiz();
+      setTimeout(() => finishQuiz(), 1000);
     } else {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setTimeLeft(30);
+      setTimeout(() => {
+        setCurrentQuestionIndex(prev => prev + 1);
+      }, 1000);
     }
   };
 
   const handleAnswer = (selectedAnswer: number, isCorrect: boolean) => {
+    setIsAnswered(true);
+    
     if (isCorrect) {
       setScore(prev => prev + 1);
     }
 
     if (isLastQuestion) {
-      finishQuiz();
+      setTimeout(() => finishQuiz(), 2000);
     } else {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setTimeLeft(30);
+      setTimeout(() => {
+        setCurrentQuestionIndex(prev => prev + 1);
+      }, 2000);
     }
   };
 
